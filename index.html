@@ -111,6 +111,76 @@ h1 { margin: 22px 0 18px; font-family: 'Space Grotesk', sans-serif; font-size: c
 }
 
   </style>
+
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Desafio das Equações - início">
+        <span class="brand-icon">∑</span>
+        <span>desafio<span class="brand-accent">.</span></span>
+      </a>
+      <div class="top-tag"><span class="live-dot"></span> TREINE SUA MENTE</div>
+    </header>
+
+    <section class="game-layout" aria-labelledby="page-title">
+      <div class="intro">
+        <span class="eyebrow"><span class="sparkle">✦</span> MATEMÁTICA DO SEU JEITO</span>
+        <h1 id="page-title">Quanto vale<br><span class="gradient-text">essa equação?</span></h1>
+        <p class="subtitle">Encontre o valor de x, escolha a resposta certa e avance. Bora desafiar sua lógica?</p>
+        <div class="mini-stats">
+          <div class="mini-stat"><span class="stat-icon">⚡</span><span>Respostas rápidas</span></div>
+          <div class="mini-stat"><span class="stat-icon">✦</span><span>Aprenda jogando</span></div>
+        </div>
+      </div>
+
+      <section class="game-card" aria-label="Jogo de equações">
+        <div class="card-top">
+          <div class="level-label"><span class="level-dot"></span><span id="level-name">NÍVEL 01 · INICIANTE</span></div>
+          <div class="question-count">QUESTÃO <strong id="question-number">01</strong></div>
+        </div>
+
+        <div class="progress-track" role="progressbar" aria-label="Progresso da rodada" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div class="score-row">
+          <div class="score-item"><span class="score-symbol">★</span><span>PONTOS</span><strong id="score">0</strong></div>
+          <div class="score-item"><span class="score-symbol streak-symbol">♨</span><span>SEQUÊNCIA</span><strong id="streak">0</strong></div>
+        </div>
+
+        <div class="question-area">
+          <p class="question-hint">DESCUBRA O VALOR DE</p>
+          <div class="equation" id="equation" aria-live="polite">x + 7 = 15</div>
+          <p class="instruction">Qual é o valor de <span class="x-mark">x</span>?</p>
+        </div>
+
+        <div class="answers" id="answers" aria-label="Opções de resposta">
+          <button class="answer-btn" type="button" data-answer="8"><span class="answer-letter">A</span><span>8</span></button>
+          <button class="answer-btn" type="button" data-answer="6"><span class="answer-letter">B</span><span>6</span></button>
+          <button class="answer-btn" type="button" data-answer="9"><span class="answer-letter">C</span><span>9</span></button>
+          <button class="answer-btn" type="button" data-answer="7"><span class="answer-letter">D</span><span>7</span></button>
+        </div>
+
+        <div class="feedback" id="feedback" role="status" aria-live="polite">Escolha uma das quatro alternativas acima.</div>
+        <div class="card-footer">
+          <span><span class="keyboard-icon">⌨</span> Escolha uma alternativa para continuar</span>
+          <span class="round-label">RODADA DE 10</span>
+        </div>
+
+        <div class="result-screen" id="result-screen" hidden>
+          <div class="result-icon">🏆</div>
+          <p class="question-hint">FIM DA RODADA</p>
+          <h2>Mandou muito bem!</h2>
+          <p class="result-copy" id="result-copy">Você concluiu as 10 questões.</p>
+          <div class="final-score"><span>SUA PONTUAÇÃO</span><strong id="final-score">0</strong></div>
+          <button class="restart-btn" id="restart-btn" type="button">Jogar novamente <span>↗</span></button>
+        </div>
+      </section>
+    </section>
+
+    <footer class="page-footer"><span>FEITO PARA QUEM GOSTA DE UM BOM DESAFIO</span><span>∑ <span id="year"></span> · DESAFIO DAS EQUAÇÕES</span></footer>
+  </main>
   <script>
 const TOTAL_QUESTIONS = 10;
 const equationEl = document.querySelector('#equation');
@@ -240,74 +310,5 @@ document.querySelector('#year').textContent = new Date().getFullYear();
 renderQuestion();
 
   </script>
-</head>
-<body>
-  <main class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="#" aria-label="Desafio das Equações - início">
-        <span class="brand-icon">∑</span>
-        <span>desafio<span class="brand-accent">.</span></span>
-      </a>
-      <div class="top-tag"><span class="live-dot"></span> TREINE SUA MENTE</div>
-    </header>
-
-    <section class="game-layout" aria-labelledby="page-title">
-      <div class="intro">
-        <span class="eyebrow"><span class="sparkle">✦</span> MATEMÁTICA DO SEU JEITO</span>
-        <h1 id="page-title">Quanto vale<br><span class="gradient-text">essa equação?</span></h1>
-        <p class="subtitle">Encontre o valor de x, escolha a resposta certa e avance. Bora desafiar sua lógica?</p>
-        <div class="mini-stats">
-          <div class="mini-stat"><span class="stat-icon">⚡</span><span>Respostas rápidas</span></div>
-          <div class="mini-stat"><span class="stat-icon">✦</span><span>Aprenda jogando</span></div>
-        </div>
-      </div>
-
-      <section class="game-card" aria-label="Jogo de equações">
-        <div class="card-top">
-          <div class="level-label"><span class="level-dot"></span><span id="level-name">NÍVEL 01 · INICIANTE</span></div>
-          <div class="question-count">QUESTÃO <strong id="question-number">01</strong></div>
-        </div>
-
-        <div class="progress-track" role="progressbar" aria-label="Progresso da rodada" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="progress-track">
-          <div class="progress-fill" id="progress-fill"></div>
-        </div>
-
-        <div class="score-row">
-          <div class="score-item"><span class="score-symbol">★</span><span>PONTOS</span><strong id="score">0</strong></div>
-          <div class="score-item"><span class="score-symbol streak-symbol">♨</span><span>SEQUÊNCIA</span><strong id="streak">0</strong></div>
-        </div>
-
-        <div class="question-area">
-          <p class="question-hint">DESCUBRA O VALOR DE</p>
-          <div class="equation" id="equation" aria-live="polite">x + 7 = 15</div>
-          <p class="instruction">Qual é o valor de <span class="x-mark">x</span>?</p>
-        </div>
-
-        <div class="answers" id="answers" aria-label="Opções de resposta">
-          <button class="answer-btn" type="button" data-answer="8"><span class="answer-letter">A</span><span>8</span></button>
-          <button class="answer-btn" type="button" data-answer="6"><span class="answer-letter">B</span><span>6</span></button>
-          <button class="answer-btn" type="button" data-answer="9"><span class="answer-letter">C</span><span>9</span></button>
-          <button class="answer-btn" type="button" data-answer="7"><span class="answer-letter">D</span><span>7</span></button>
-        </div>
-
-        <div class="feedback" id="feedback" role="status" aria-live="polite">Escolha uma das quatro alternativas acima.</div>
-        <div class="card-footer">
-          <span><span class="keyboard-icon">⌨</span> Escolha uma alternativa para continuar</span>
-          <span class="round-label">RODADA DE 10</span>
-        </div>
-
-        <div class="result-screen" id="result-screen" hidden>
-          <div class="result-icon">🏆</div>
-          <p class="question-hint">FIM DA RODADA</p>
-          <h2>Mandou muito bem!</h2>
-          <p class="result-copy" id="result-copy">Você concluiu as 10 questões.</p>
-          <div class="final-score"><span>SUA PONTUAÇÃO</span><strong id="final-score">0</strong></div>
-          <button class="restart-btn" id="restart-btn" type="button">Jogar novamente <span>↗</span></button>
-        </div>
-      </section>
-    </section>
-
-    <footer class="page-footer"><span>FEITO PARA QUEM GOSTA DE UM BOM DESAFIO</span><span>∑ <span id="year"></span> · DESAFIO DAS EQUAÇÕES</span></footer>
-  </main>
 </body>
 </html>
