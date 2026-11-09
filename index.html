@@ -438,6 +438,12 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-sp
     {level:5, text:'Uma pessoa investe R$ 2 000 a juros compostos de 5% ao mês. Qual será o montante após 2 meses?', options:['R$ 2 100','R$ 2 200','R$ 2 205','R$ 2 250'], answer:'R$ 2 205', hint:'Use M = C(1 + i)ⁿ. Converta 5% para 0,05 e considere dois períodos.', explanation:'M = 2 000 × (1,05)² = 2 000 × 1,1025 = R$ 2 205. Nos juros compostos, os juros de cada mês também rendem juros no mês seguinte.'},
     {level:5, text:'Em uma pesquisa, 60% dos participantes preferem ônibus. Entre os demais, metade prefere bicicleta. Se 120 pessoas participaram, quantas preferem bicicleta?', options:['12','18','24','36'], answer:'24', hint:'Primeiro encontre quantos não preferem ônibus. Depois calcule a metade desse grupo.', explanation:'60% de 120 = 72 preferem ônibus. Restam 120 − 72 = 48 pessoas. Metade de 48 é 24 pessoas que preferem bicicleta.'},
     {level:5, text:'Um produto sofreu aumento de 25%. Para voltar exatamente ao preço inicial, qual desconto deve ser aplicado sobre o preço reajustado?', options:['15%','20%','25%','30%'], answer:'20%', hint:'Considere um preço inicial de R$ 100. Depois do aumento, o preço passa a R$ 125. Qual redução percentual sobre 125 devolve 100?', explanation:'Com preço inicial de R$ 100, após aumento de 25% temos R$ 125. Para voltar a 100, o desconto é 25 reais. Em relação a 125: 25 ÷ 125 = 0,20 = 20%.'}
+
+    {level:1, text:'Uma passagem de ônibus custa R$ 4,50. Quanto uma pessoa gasta em 4 passagens?', options:['R$ 16','R$ 17','R$ 18','R$ 20'], answer:'R$ 18', hint:'Multiplique o preço de uma passagem pela quantidade de passagens.', explanation:'4 × 4,50 = R$ 18. Como todas as passagens têm o mesmo preço, usamos multiplicação.'},
+    {level:2, text:'Uma conta de energia de R$ 180 teve acréscimo de 15%. Qual é o novo valor?', options:['R$ 195','R$ 207','R$ 210','R$ 215'], answer:'R$ 207', hint:'Calcule 15% de 180 e some ao valor original.', explanation:'15% de 180 = 27. Somando o acréscimo: 180 + 27 = R$ 207.'},
+    {level:3, text:'Um ciclista percorre 18 km em 45 minutos, mantendo velocidade média constante. Qual é sua velocidade em km/h?', options:['18 km/h','20 km/h','24 km/h','27 km/h'], answer:'24 km/h', hint:'Converta 45 minutos para horas e divida a distância pelo tempo.', explanation:'45 minutos = 0,75 hora. Velocidade média = 18 ÷ 0,75 = 24 km/h.'},
+    {level:4, text:'Uma escada de 10 m está apoiada em uma parede e alcança 8 m de altura. Qual é a distância entre a base da escada e a parede?', options:['4 m','5 m','6 m','7 m'], answer:'6 m', hint:'A escada é a hipotenusa. Use a² + 8² = 10².', explanation:'Pelo teorema de Pitágoras: a² + 64 = 100, então a² = 36 e a = 6 m.'},
+    {level:5, text:'Uma cultura de microrganismos começa com 300 indivíduos e triplica a cada hora. Quantos haverá após 4 horas?', options:['2 700','8 100','24 300','32 400'], answer:'24 300', hint:'Multiplique a quantidade inicial por 3 elevado ao número de horas.', explanation:'Após 4 horas: 300 × 3⁴ = 300 × 81 = 24 300 indivíduos.'},
   ];
 
   function makeEquation() {
@@ -515,7 +521,7 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-sp
     const buttons = [...answersEl.querySelectorAll('button')];
     buttons.forEach(button => {
       button.disabled = true;
-      if (Number(button.dataset.answer) === currentAnswer) button.classList.add('correct');
+      if (String(button.dataset.answer) === String(currentAnswer)) button.classList.add('correct');
     });
 
     if (String(value) === String(currentAnswer)) {
