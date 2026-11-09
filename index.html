@@ -265,6 +265,21 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-sp
  .formula-shelf { margin-top:20px; }
 }
 
+
+.hint-controls { display:flex; flex-direction:column; align-items:center; gap:8px; margin:0 0 9px; }
+.hint-btn {
+  border:1px solid rgba(220,232,205,.38); border-radius:5px; padding:9px 15px;
+  color:#e6edda; background:rgba(185,214,155,.10); cursor:pointer;
+  font:700 12px "Trebuchet MS",sans-serif; transition:background .15s, transform .15s;
+}
+.hint-btn:hover:not(:disabled) { background:rgba(185,214,155,.2); transform:translateY(-1px); }
+.hint-btn:focus-visible { outline:2px solid #d9e5c4; outline-offset:3px; }
+.hint-btn:disabled { opacity:.55; cursor:default; }
+.hint-message {
+  max-width:100%; margin:0; padding:9px 12px; border-left:2px solid #c8dfa9;
+  background:rgba(185,214,155,.08); color:#e0e8d5; font-size:12px; line-height:1.5;
+}
+.hint-message[hidden] { display:none; }
   </style>
 
 </head>
@@ -311,7 +326,7 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-sp
           <div class="question-count">QUESTÃO <strong id="question-number">01</strong></div>
         </div>
 
-        <div class="progress-track" role="progressbar" aria-label="Progresso da rodada" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="progress-track">
+        <div class="progress-track" role="progressbar" aria-label="Progresso da rodada" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0" id="progress-track">
           <div class="progress-fill" id="progress-fill"></div>
         </div>
 
@@ -324,6 +339,11 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-sp
           <p class="question-hint">DESCUBRA O VALOR DE</p>
           <div class="equation" id="equation" aria-live="polite">x + 7 = 15</div>
           <p class="instruction">Qual é o valor de <span class="x-mark">x</span>?</p>
+        </div>
+
+        <div class="hint-controls">
+          <button class="hint-btn" id="hint-btn" type="button">💡 Pedir uma dica</button>
+          <p class="hint-message" id="hint-message" role="status" aria-live="polite" hidden></p>
         </div>
 
         <div class="answers" id="answers" aria-label="Opções de resposta">
@@ -356,7 +376,7 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-sp
 (() => {
   'use strict';
 
-  const TOTAL_QUESTIONS = 15;
+  const TOTAL_QUESTIONS = 30;
   const equationEl = document.querySelector('#equation');
   const answersEl = document.querySelector('#answers');
   const feedbackEl = document.querySelector('#feedback');
@@ -375,52 +395,90 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-sp
   let locked = false;
   let advanceTimer = null;
   let correctCount = 0;
+  let currentHint = '';
+  let hintUsed = false;
 
   progressTrackEl.setAttribute('aria-valuemax', String(TOTAL_QUESTIONS));
-  document.querySelector('.round-label').textContent = 'RODADA DE ' + TOTAL_QUESTIONS;
+  document.querySelector('.round-label').textContent = '30 QUESTÕES · DIFICULDADE PROGRESSIVA';
 
   const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
   function makeEquation() {
-    const level = questionIndex < 5 ? 1 : questionIndex < 10 ? 2 : 3;
-    let x, a, b, c, text;
-
-    // Cada rodada mistura operações e equações de uma ou duas etapas.
-    const types = level === 1
-      ? ['add', 'subtract', 'multiply', 'divide']
-      : level === 2
-        ? ['add', 'subtract', 'multiply', 'divide', 'twoStep']
-        : ['add', 'subtract', 'multiply', 'divide', 'twoStep', 'parentheses'];
-    const type = types[randomInt(0, types.length - 1)];
+    // A dificuldade sobe conforme o total de respostas corretas, não apenas pelo número da questão.
+    const level = correctCount < 5 ? 1 : correctCount < 10 ? 2 : correctCount < 15 ? 3 : correctCount < 20 ? 4 : 5;
+    let x, a, b, c, d, text, hint;
+    const types = {
+      1: ['add', 'subtract', 'multiply', 'divide'],
+      2: ['twoStep', 'twoStep', 'add', 'multiply', 'divide'],
+      3: ['parentheses', 'distribute', 'twoStep', 'parentheses'],
+      4: ['bothSides', 'fraction', 'square', 'distribute'],
+      5: ['bothSides', 'fraction', 'square', 'nested', 'parentheses']
+    };
+    const type = types[level][randomInt(0, types[level].length - 1)];
 
     switch (type) {
       case 'add':
-        x = randomInt(2, 30); a = randomInt(2, 25);
+        x = randomInt(2, 35); a = randomInt(3, 30);
         text = 'x + ' + a + ' = ' + (x + a);
+        hint = 'O número que está somando com x deve passar para o outro lado subtraindo.';
         break;
       case 'subtract':
-        x = randomInt(5, 35); a = randomInt(2, x - 1);
+        x = randomInt(8, 45); a = randomInt(2, x - 1);
         text = 'x − ' + a + ' = ' + (x - a);
+        hint = 'Para deixar x sozinho, desfaça a subtração usando a operação inversa.';
         break;
       case 'multiply':
-        x = randomInt(2, 12); a = randomInt(2, 12);
+        x = randomInt(2, 15); a = randomInt(2, 14);
         text = a + ' × x = ' + (a * x);
+        hint = 'x está sendo multiplicado. Qual operação desfaz essa multiplicação?';
         break;
       case 'divide':
         x = randomInt(2, 15); a = randomInt(2, 10);
         text = 'x ÷ ' + a + ' = ' + x;
         x = x * a;
+        hint = 'x está dividido por um número. Pense na operação inversa da divisão.';
         break;
       case 'twoStep':
-        x = randomInt(2, 15); a = randomInt(2, 8); b = randomInt(1, 20);
+        x = randomInt(2, 18); a = randomInt(2, 9); b = randomInt(2, 24);
         text = a + 'x + ' + b + ' = ' + (a * x + b);
+        hint = 'Resolva em etapas: desfaça primeiro a soma e depois cuide do número que multiplica x.';
         break;
       case 'parentheses':
-        x = randomInt(2, 12); a = randomInt(2, 6); b = randomInt(1, 10);
+        x = randomInt(2, 14); a = randomInt(2, 7); b = randomInt(1, 12);
         text = a + '(x + ' + b + ') = ' + (a * (x + b));
+        hint = 'Comece desfazendo o fator que multiplica os parênteses. Depois resolva o que ficou dentro.';
+        break;
+      case 'distribute':
+        x = randomInt(2, 16); a = randomInt(2, 8); b = randomInt(1, 12); c = randomInt(1, 10);
+        text = a + '(x + ' + b + ') − ' + c + ' = ' + (a * (x + b) - c);
+        hint = 'Use a distributiva ou desfaça as operações de fora para dentro, uma por vez.';
+        break;
+      case 'bothSides':
+        x = randomInt(3, 20); a = randomInt(5, 10); c = randomInt(1, a - 1);
+        b = randomInt(1, 15); d = (a - c) * x + b;
+        text = a + 'x + ' + b + ' = ' + c + 'x + ' + (b + d - b);
+        // Ajusta o segundo membro para que a solução continue sendo x.
+        text = a + 'x + ' + b + ' = ' + c + 'x + ' + (a * x + b - c * x);
+        hint = 'Junte os termos com x de um lado e os números sem x do outro.';
+        break;
+      case 'fraction':
+        a = randomInt(2, 8); x = randomInt(2, 12) * a; b = randomInt(1, 12);
+        text = 'x/' + a + ' + ' + b + ' = ' + (x / a + b);
+        hint = 'Isole primeiro a fração com x. Depois elimine o denominador usando a operação inversa.';
+        break;
+      case 'square':
+        x = randomInt(2, 15); b = randomInt(1, 25);
+        text = 'x² + ' + b + ' = ' + (x * x + b);
+        hint = 'Isole o termo x² primeiro. Depois pense em qual número positivo elevado ao quadrado produz esse resultado.';
+        break;
+      case 'nested':
+        x = randomInt(2, 12); a = randomInt(2, 5); b = randomInt(1, 8); c = randomInt(2, 5); d = randomInt(1, 8);
+        text = a + '(x + ' + b + ') + ' + c + ' = ' + (a * (x + b) + c);
+        hint = 'Desfaça as operações na ordem inversa: comece pelo que está fora dos parênteses.';
         break;
     }
-    return { text, answer: x, level };
+    const levelNames = ['','OPERAÇÕES','DUAS ETAPAS','PARÊNTESES','ÁLGEBRA','DESAFIO MÁXIMO'];
+    return { text, answer: x, level, hint, levelName: levelNames[level] };
   }
 
   function makeOptions(correct) {
@@ -443,11 +501,17 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-sp
     locked = false;
     const question = makeEquation();
     currentAnswer = question.answer;
+    currentHint = question.hint;
+    hintUsed = false;
+    const hintButton = document.querySelector('#hint-btn');
+    const hintMessage = document.querySelector('#hint-message');
+    hintButton.disabled = false;
+    hintButton.textContent = '💡 Pedir uma dica';
+    hintMessage.hidden = true;
+    hintMessage.textContent = '';
     equationEl.textContent = question.text;
     questionNumberEl.textContent = String(questionIndex + 1).padStart(2, '0');
-    levelNameEl.textContent = question.level === 1
-      ? 'NÍVEL 01 · OPERAÇÕES'
-      : question.level === 2 ? 'NÍVEL 02 · EQUAÇÕES' : 'NÍVEL 03 · DESAFIO';
+    levelNameEl.textContent = 'NÍVEL 0' + question.level + ' · ' + question.levelName;
     progressFillEl.style.width = (questionIndex / TOTAL_QUESTIONS * 100) + '%';
     progressTrackEl.setAttribute('aria-valuenow', String(questionIndex));
     feedbackEl.textContent = 'Escolha uma das quatro alternativas.';
@@ -474,6 +538,7 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-sp
   function chooseAnswer(selectedButton, value) {
     if (locked) return;
     locked = true;
+    document.querySelector('#hint-btn').disabled = true;
     const buttons = [...answersEl.querySelectorAll('button')];
     buttons.forEach(button => {
       button.disabled = true;
@@ -539,6 +604,17 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-sp
       chip.setAttribute('aria-pressed', 'true');
       formulaNote.innerHTML = formulaNotes[chip.dataset.formula];
     });
+  });
+
+  document.querySelector('#hint-btn').addEventListener('click', () => {
+    if (locked || hintUsed) return;
+    hintUsed = true;
+    const hintButton = document.querySelector('#hint-btn');
+    const hintMessage = document.querySelector('#hint-message');
+    hintMessage.textContent = currentHint;
+    hintMessage.hidden = false;
+    hintButton.disabled = true;
+    hintButton.textContent = '✓ Dica utilizada';
   });
 
   document.querySelector('#restart-btn').addEventListener('click', restartGame);
