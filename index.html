@@ -110,6 +110,118 @@ h1 { margin: 22px 0 18px; font-family: 'Space Grotesk', sans-serif; font-size: c
   .card-footer { font-size: 7px; }
 }
 
+  
+/* Visual de quadro-negro inspirado na referência enviada */
+:root {
+  color-scheme: dark;
+  --bg: #101311;
+  --panel: #18201b;
+  --panel-soft: #202a23;
+  --muted: #a8b2a7;
+  --text: #f4f1df;
+  --purple: #b9d69b;
+  --cyan: #d9e5c4;
+  --green: #a9d58d;
+  --red: #f18b83;
+}
+body {
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(ellipse at 18% 14%, rgba(111,139,103,.15), transparent 38%),
+    radial-gradient(ellipse at 83% 82%, rgba(105,129,94,.10), transparent 42%),
+    repeating-linear-gradient(3deg, rgba(255,255,255,.012) 0 1px, transparent 1px 4px),
+    #111713;
+}
+.app-shell { width: min(1180px, calc(100% - 48px)); }
+.topbar { border-bottom: 1px solid rgba(231,239,216,.16); }
+.brand { font-family: Georgia, serif; letter-spacing: -.4px; }
+.brand-icon {
+  border-radius: 4px; background: #dce5c8; color: #172019;
+  box-shadow: 2px 3px 0 rgba(0,0,0,.35); transform: rotate(-3deg);
+}
+.brand-accent, .eyebrow, .stat-icon { color: #c8dfa9; }
+.top-tag { color: #c3cbb9; }
+.live-dot, .level-dot { background: #b9d69b; box-shadow: 0 0 10px rgba(185,214,155,.5); }
+.game-layout { gap: clamp(36px, 6vw, 82px); }
+.eyebrow, .level-label, .question-count, .question-hint, .score-item > span:nth-child(2), .card-footer, .page-footer {
+  font-family: "Courier New", monospace; letter-spacing: 1.2px;
+}
+h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-spacing: -2px; }
+.gradient-text {
+  background: none; color: #d6e5bd;
+  text-decoration: underline; text-decoration-color: rgba(214,229,189,.55);
+  text-decoration-thickness: 2px; text-underline-offset: 7px;
+}
+.subtitle { color: #b8c0b3; }
+.mini-stat { color: #d0d4c7; }
+.game-card {
+  border: 1px solid rgba(222,232,205,.42);
+  border-radius: 8px;
+  background:
+    radial-gradient(ellipse at 22% 18%, rgba(190,207,168,.055), transparent 45%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px),
+    linear-gradient(145deg, #263329, #18231c 68%, #202b22);
+  box-shadow: 0 22px 55px rgba(0,0,0,.42), inset 0 0 35px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.08);
+}
+.game-card::before {
+  left: 5%; right: 5%; height: 2px;
+  background: linear-gradient(90deg, transparent, #d9e5c4, transparent);
+  opacity: .45;
+}
+.level-label, .question-count, .question-hint { color: #c7d0bd; }
+.progress-track { background: rgba(4,10,6,.55); border: 1px solid rgba(231,239,216,.14); }
+.progress-fill { background: linear-gradient(90deg, #9ebd80, #e0e8ca); }
+.score-row, .card-footer { border-color: rgba(231,239,216,.17); }
+.score-symbol { color: #e5d79c; }
+.streak-symbol { color: #c4d9a7; }
+.score-item > span:nth-child(2) { color: #aeb9a9; }
+.question-area { padding: 30px 0 25px; }
+.equation {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(40px, 5vw, 54px);
+  color: #f5f2df;
+  text-shadow: 0 0 1px rgba(255,255,255,.8), 0 2px 10px rgba(240,245,222,.10);
+  letter-spacing: 1px;
+}
+.instruction { color: #c4cbbd; }
+.x-mark { color: #d4e4b8; }
+.answer-btn {
+  border: 1px solid rgba(227,235,211,.27);
+  border-radius: 5px;
+  background: rgba(7,15,10,.28);
+  color: #f2f0df;
+  font-family: Georgia, serif;
+  box-shadow: inset 0 1px rgba(255,255,255,.035);
+}
+.answer-btn:hover:not(:disabled) {
+  transform: translateY(-2px); border-color: #d2e1b8;
+  background: rgba(181,207,151,.13);
+}
+.answer-letter {
+  border-radius: 3px; background: rgba(210,225,188,.13);
+  color: #d5e3bd; font-family: "Courier New", monospace;
+}
+.answer-btn.correct { border-color: #a9d58d; background: rgba(105,151,79,.23); }
+.answer-btn.wrong { border-color: #f18b83; background: rgba(160,68,65,.2); }
+.feedback { color: #c4cbbd; }
+.feedback.success { color: #c5e4a7; }
+.feedback.error { color: #ffaaa0; }
+.card-footer { color: #a5b09f; }
+.round-label { color: #d2dfb9; }
+.result-screen { background: rgba(20,31,23,.98); }
+.result-screen h2 { font-family: Georgia, serif; }
+.final-score strong { color: #d2e4b8; }
+.restart-btn {
+  border: 1px solid rgba(239,244,224,.45); border-radius: 5px;
+  background: #d8e4c3; color: #1a251b;
+  font-family: "Trebuchet MS", sans-serif;
+}
+.page-footer { border-color: rgba(231,239,216,.16); color: #9da99a; }
+.page-footer > span:last-child { color: #c2cbb8; }
+@media (max-width: 760px) {
+  .app-shell { width: min(540px, calc(100% - 32px)); }
+}
+
   </style>
 
 </head>
