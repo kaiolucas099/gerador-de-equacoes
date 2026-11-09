@@ -182,133 +182,180 @@ h1 { margin: 22px 0 18px; font-family: 'Space Grotesk', sans-serif; font-size: c
     <footer class="page-footer"><span>FEITO PARA QUEM GOSTA DE UM BOM DESAFIO</span><span>∑ <span id="year"></span> · DESAFIO DAS EQUAÇÕES</span></footer>
   </main>
   <script>
-const TOTAL_QUESTIONS = 10;
-const equationEl = document.querySelector('#equation');
-const answersEl = document.querySelector('#answers');
-const feedbackEl = document.querySelector('#feedback');
-const scoreEl = document.querySelector('#score');
-const streakEl = document.querySelector('#streak');
-const questionNumberEl = document.querySelector('#question-number');
-const progressFillEl = document.querySelector('#progress-fill');
-const progressTrackEl = document.querySelector('#progress-track');
-const levelNameEl = document.querySelector('#level-name');
-const resultScreen = document.querySelector('#result-screen');
+(() => {
+  'use strict';
 
-let questionIndex = 0;
-let score = 0;
-let streak = 0;
-let currentAnswer = 0;
-let locked = false;
-let advanceTimer;
+  const TOTAL_QUESTIONS = 15;
+  const equationEl = document.querySelector('#equation');
+  const answersEl = document.querySelector('#answers');
+  const feedbackEl = document.querySelector('#feedback');
+  const scoreEl = document.querySelector('#score');
+  const streakEl = document.querySelector('#streak');
+  const questionNumberEl = document.querySelector('#question-number');
+  const progressFillEl = document.querySelector('#progress-fill');
+  const progressTrackEl = document.querySelector('#progress-track');
+  const levelNameEl = document.querySelector('#level-name');
+  const resultScreen = document.querySelector('#result-screen');
 
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+  let questionIndex = 0;
+  let score = 0;
+  let streak = 0;
+  let currentAnswer = 0;
+  let locked = false;
+  let advanceTimer = null;
+  let correctCount = 0;
 
-function createQuestion() {
-  // Equações lineares simples: a*x + b = c, com solução inteira positiva.
-  const answer = randomInt(2, 15);
-  const coefficient = randomInt(1, 5);
-  const offset = randomInt(1, 12);
-  const result = coefficient * answer + offset;
-  const left = coefficient === 1 ? 'x' : coefficient + 'x';
-  return { text: `${left} + ${offset} = ${result}`, answer };
-}
+  progressTrackEl.setAttribute('aria-valuemax', String(TOTAL_QUESTIONS));
+  document.querySelector('.round-label').textContent = 'RODADA DE ' + TOTAL_QUESTIONS;
 
-function createOptions(correct) {
-  const options = new Set([correct]);
-  while (options.size < 4) {
-    const variation = randomInt(1, 7) * (Math.random() < 0.5 ? -1 : 1);
-    const candidate = correct + variation;
-    if (candidate > 0) options.add(candidate);
+  const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+  function makeEquation() {
+    const level = questionIndex < 5 ? 1 : questionIndex < 10 ? 2 : 3;
+    let x, a, b, c, text;
+
+    // Cada rodada mistura operações e equações de uma ou duas etapas.
+    const types = level === 1
+      ? ['add', 'subtract', 'multiply', 'divide']
+      : level === 2
+        ? ['add', 'subtract', 'multiply', 'divide', 'twoStep']
+        : ['add', 'subtract', 'multiply', 'divide', 'twoStep', 'parentheses'];
+    const type = types[randomInt(0, types.length - 1)];
+
+    switch (type) {
+      case 'add':
+        x = randomInt(2, 30); a = randomInt(2, 25);
+        text = 'x + ' + a + ' = ' + (x + a);
+        break;
+      case 'subtract':
+        x = randomInt(5, 35); a = randomInt(2, x - 1);
+        text = 'x − ' + a + ' = ' + (x - a);
+        break;
+      case 'multiply':
+        x = randomInt(2, 12); a = randomInt(2, 12);
+        text = a + ' × x = ' + (a * x);
+        break;
+      case 'divide':
+        x = randomInt(2, 15); a = randomInt(2, 10);
+        text = 'x ÷ ' + a + ' = ' + x;
+        x = x * a;
+        break;
+      case 'twoStep':
+        x = randomInt(2, 15); a = randomInt(2, 8); b = randomInt(1, 20);
+        text = a + 'x + ' + b + ' = ' + (a * x + b);
+        break;
+      case 'parentheses':
+        x = randomInt(2, 12); a = randomInt(2, 6); b = randomInt(1, 10);
+        text = a + '(x + ' + b + ') = ' + (a * (x + b));
+        break;
+    }
+    return { text, answer: x, level };
   }
-  return [...options].sort(() => Math.random() - 0.5);
-}
 
-function renderQuestion() {
-  locked = false;
-  const question = createQuestion();
-  currentAnswer = question.answer;
-  equationEl.textContent = question.text;
-  questionNumberEl.textContent = String(questionIndex + 1).padStart(2, '0');
-  levelNameEl.textContent = questionIndex < 3 ? 'NÍVEL 01 · INICIANTE' : questionIndex < 7 ? 'NÍVEL 02 · INTERMEDIÁRIO' : 'NÍVEL 03 · DESAFIO';
-  const progress = (questionIndex / TOTAL_QUESTIONS) * 100;
-  progressFillEl.style.width = progress + '%';
-  progressTrackEl.setAttribute('aria-valuenow', String(questionIndex));
-  feedbackEl.textContent = 'Escolha uma das quatro alternativas acima.';
-  feedbackEl.className = 'feedback';
-  answersEl.replaceChildren();
+  function makeOptions(correct) {
+    const options = new Set([correct]);
+    // Distratores diferentes e próximos da resposta correta.
+    while (options.size < 4) {
+      const distance = randomInt(1, Math.max(5, Math.min(15, Math.ceil(correct / 2))));
+      const candidate = correct + (Math.random() < 0.5 ? -distance : distance);
+      if (candidate > 0) options.add(candidate);
+    }
+    const result = [...options];
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = randomInt(0, i);
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+  }
 
-  createOptions(currentAnswer).forEach((value, index) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'answer-btn';
-    button.dataset.answer = String(value);
-    button.setAttribute('aria-label', `Alternativa ${String.fromCharCode(65 + index)}: ${value}`);
-    const letter = document.createElement('span');
-    letter.className = 'answer-letter';
-    letter.textContent = String.fromCharCode(65 + index);
-    const answerText = document.createElement('span');
-    answerText.textContent = String(value);
-    button.append(letter, answerText);
-    button.addEventListener('click', () => chooseAnswer(button, value));
-    answersEl.append(button);
-  });
-}
+  function renderQuestion() {
+    locked = false;
+    const question = makeEquation();
+    currentAnswer = question.answer;
+    equationEl.textContent = question.text;
+    questionNumberEl.textContent = String(questionIndex + 1).padStart(2, '0');
+    levelNameEl.textContent = question.level === 1
+      ? 'NÍVEL 01 · OPERAÇÕES'
+      : question.level === 2 ? 'NÍVEL 02 · EQUAÇÕES' : 'NÍVEL 03 · DESAFIO';
+    progressFillEl.style.width = (questionIndex / TOTAL_QUESTIONS * 100) + '%';
+    progressTrackEl.setAttribute('aria-valuenow', String(questionIndex));
+    feedbackEl.textContent = 'Escolha uma das quatro alternativas.';
+    feedbackEl.className = 'feedback';
+    answersEl.replaceChildren();
 
-function chooseAnswer(selectedButton, value) {
-  if (locked) return;
-  locked = true;
-  const buttons = [...answersEl.querySelectorAll('button')];
-  buttons.forEach(button => {
-    button.disabled = true;
-    if (Number(button.dataset.answer) === currentAnswer) button.classList.add('correct');
-  });
+    makeOptions(currentAnswer).forEach((value, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'answer-btn';
+      button.dataset.answer = String(value);
+      button.setAttribute('aria-label', 'Alternativa ' + String.fromCharCode(65 + index) + ': ' + value);
+      const letter = document.createElement('span');
+      letter.className = 'answer-letter';
+      letter.textContent = String.fromCharCode(65 + index);
+      const answerText = document.createElement('span');
+      answerText.textContent = String(value);
+      button.append(letter, answerText);
+      button.addEventListener('click', () => chooseAnswer(button, value));
+      answersEl.append(button);
+    });
+  }
 
-  if (value === currentAnswer) {
-    score += 10;
-    streak += 1;
-    feedbackEl.textContent = '✓ Isso aí! Resposta correta. Próxima questão...';
-    feedbackEl.className = 'feedback success';
-  } else {
+  function chooseAnswer(selectedButton, value) {
+    if (locked) return;
+    locked = true;
+    const buttons = [...answersEl.querySelectorAll('button')];
+    buttons.forEach(button => {
+      button.disabled = true;
+      if (Number(button.dataset.answer) === currentAnswer) button.classList.add('correct');
+    });
+
+    if (value === currentAnswer) {
+      score += 10;
+      streak += 1;
+      correctCount += 1;
+      feedbackEl.textContent = '✓ Resposta correta! Próximo cálculo...';
+      feedbackEl.className = 'feedback success';
+    } else {
+      streak = 0;
+      selectedButton.classList.add('wrong');
+      feedbackEl.textContent = 'A resposta certa é ' + currentAnswer + '. Vamos tentar a próxima!';
+      feedbackEl.className = 'feedback error';
+    }
+
+    scoreEl.textContent = String(score);
+    streakEl.textContent = String(streak);
+    advanceTimer = window.setTimeout(() => {
+      questionIndex += 1;
+      if (questionIndex >= TOTAL_QUESTIONS) finishGame();
+      else renderQuestion();
+    }, 1000);
+  }
+
+  function finishGame() {
+    progressFillEl.style.width = '100%';
+    progressTrackEl.setAttribute('aria-valuenow', String(TOTAL_QUESTIONS));
+    document.querySelector('#final-score').textContent = String(score);
+    document.querySelector('#result-copy').textContent =
+      'Você acertou ' + correctCount + ' de ' + TOTAL_QUESTIONS + ' cálculos e fez ' + score + ' pontos.';
+    resultScreen.hidden = false;
+  }
+
+  function restartGame() {
+    window.clearTimeout(advanceTimer);
+    questionIndex = 0;
+    score = 0;
     streak = 0;
-    selectedButton.classList.add('wrong');
-    feedbackEl.textContent = `Quase! A resposta certa é ${currentAnswer}. Vamos para a próxima!`;
-    feedbackEl.className = 'feedback error';
+    correctCount = 0;
+    scoreEl.textContent = '0';
+    streakEl.textContent = '0';
+    resultScreen.hidden = true;
+    renderQuestion();
   }
 
-  scoreEl.textContent = String(score);
-  streakEl.textContent = String(streak);
-  advanceTimer = window.setTimeout(() => {
-    questionIndex += 1;
-    if (questionIndex >= TOTAL_QUESTIONS) finishGame();
-    else renderQuestion();
-  }, 1100);
-}
-
-function finishGame() {
-  progressFillEl.style.width = '100%';
-  progressTrackEl.setAttribute('aria-valuenow', String(TOTAL_QUESTIONS));
-  document.querySelector('#final-score').textContent = String(score);
-  document.querySelector('#result-copy').textContent = `Você acertou ${score / 10} de ${TOTAL_QUESTIONS} questões e fez ${score} pontos.`;
-  resultScreen.hidden = false;
-}
-
-function restartGame() {
-  window.clearTimeout(advanceTimer);
-  questionIndex = 0;
-  score = 0;
-  streak = 0;
-  scoreEl.textContent = '0';
-  streakEl.textContent = '0';
-  resultScreen.hidden = true;
+  document.querySelector('#restart-btn').addEventListener('click', restartGame);
+  document.querySelector('#year').textContent = new Date().getFullYear();
   renderQuestion();
-}
-
-document.querySelector('#restart-btn').addEventListener('click', restartGame);
-document.querySelector('#year').textContent = new Date().getFullYear();
-renderQuestion();
-
+})();
   </script>
 </body>
 </html>
