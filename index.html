@@ -222,6 +222,49 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-sp
   .app-shell { width: min(540px, calc(100% - 32px)); }
 }
 
+
+/* Constelação de fórmulas em giz */
+.intro { position: relative; }
+.formula-cloud {
+  position: absolute; z-index: -0; pointer-events: none;
+  inset: -36px -28px -40px -22px; overflow: hidden; opacity: .16;
+  color: #e2ebd3; font: italic 20px Georgia,serif;
+}
+.formula-cloud span { position:absolute; white-space:nowrap; transform:rotate(-9deg); }
+.formula-cloud span:nth-child(1){top:5%;right:2%;font-size:23px}
+.formula-cloud span:nth-child(2){top:31%;left:-2%;transform:rotate(7deg)}
+.formula-cloud span:nth-child(3){top:57%;right:1%;font-size:25px}
+.formula-cloud span:nth-child(4){bottom:5%;left:8%;transform:rotate(-4deg)}
+.formula-shelf {
+  position:relative; z-index:1; margin-top:28px; padding:14px;
+  border:1px dashed rgba(218,232,198,.28); border-radius:7px;
+  background:rgba(5,13,8,.22); max-width:410px;
+}
+.formula-shelf-title {
+  margin:0 0 10px; color:#cbd8bb; font:700 9px "Courier New",monospace;
+  letter-spacing:1.2px; text-transform:uppercase;
+}
+.formula-chips { display:flex; flex-wrap:wrap; gap:7px; }
+.formula-chip {
+  border:1px solid rgba(222,235,207,.27); border-radius:4px;
+  padding:7px 10px; background:rgba(215,230,196,.06);
+  color:#edf0dc; font:italic 14px Georgia,serif; cursor:pointer;
+  transition:background .16s, transform .16s, border-color .16s;
+}
+.formula-chip:hover,.formula-chip[aria-pressed="true"] {
+  border-color:#c8dfa9; background:rgba(185,214,155,.16); transform:translateY(-1px);
+}
+.formula-chip:focus-visible { outline:2px solid #d9e5c4; outline-offset:3px; }
+.formula-note {
+  min-height:34px; margin:10px 0 0; color:#b9c5ae;
+  font:12px/1.55 "Trebuchet MS",sans-serif;
+}
+.formula-note strong { color:#e1e9d2; }
+@media(max-width:760px) {
+ .formula-cloud { inset:-18px -12px -20px; }
+ .formula-shelf { margin-top:20px; }
+}
+
   </style>
 
 </head>
@@ -244,6 +287,22 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-sp
           <div class="mini-stat"><span class="stat-icon">⚡</span><span>Respostas rápidas</span></div>
           <div class="mini-stat"><span class="stat-icon">✦</span><span>Aprenda jogando</span></div>
         </div>
+
+        <div class="formula-cloud" aria-hidden="true">
+          <span>E = mc²</span><span>F = ma</span><span>a² + b² = c²</span><span>PV = nRT</span>
+        </div>
+        <section class="formula-shelf" aria-label="Fórmulas para explorar">
+          <p class="formula-shelf-title">✎ Rabiscos do quadro · toque para explorar</p>
+          <div class="formula-chips">
+            <button class="formula-chip" type="button" data-formula="energia" aria-pressed="false">E = mc²</button>
+            <button class="formula-chip" type="button" data-formula="forca" aria-pressed="false">F = ma</button>
+            <button class="formula-chip" type="button" data-formula="pitagoras" aria-pressed="false">a² + b² = c²</button>
+            <button class="formula-chip" type="button" data-formula="gas" aria-pressed="false">PV = nRT</button>
+            <button class="formula-chip" type="button" data-formula="onda" aria-pressed="false">v = λf</button>
+            <button class="formula-chip" type="button" data-formula="cinética" aria-pressed="false">Ec = ½mv²</button>
+          </div>
+          <p class="formula-note" id="formula-note" role="status" aria-live="polite">Escolha uma fórmula para descobrir o que ela representa.</p>
+        </section>
       </div>
 
       <section class="game-card" aria-label="Jogo de equações">
@@ -463,6 +522,24 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-sp
     resultScreen.hidden = true;
     renderQuestion();
   }
+
+
+  const formulaNotes = {
+    energia: '<strong>Energia:</strong> E = mc² relaciona energia (E), massa (m) e velocidade da luz (c).',
+    forca: '<strong>Força:</strong> F = ma. A força resultante é a massa multiplicada pela aceleração.',
+    pitagoras: '<strong>Teorema de Pitágoras:</strong> em um triângulo retângulo, a² + b² = c²; c é a hipotenusa.',
+    gas: '<strong>Gases ideais:</strong> PV = nRT relaciona pressão, volume, quantidade de matéria e temperatura.',
+    onda: '<strong>Ondas:</strong> v = λf. A velocidade é o comprimento de onda (λ) vezes a frequência (f).',
+    'cinética': '<strong>Energia cinética:</strong> Ec = ½mv²; depende da massa e do quadrado da velocidade.'
+  };
+  const formulaNote = document.querySelector('#formula-note');
+  document.querySelectorAll('.formula-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.formula-chip').forEach(item => item.setAttribute('aria-pressed', 'false'));
+      chip.setAttribute('aria-pressed', 'true');
+      formulaNote.innerHTML = formulaNotes[chip.dataset.formula];
+    });
+  });
 
   document.querySelector('#restart-btn').addEventListener('click', restartGame);
   document.querySelector('#year').textContent = new Date().getFullYear();
